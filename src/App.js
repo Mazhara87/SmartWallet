@@ -1,23 +1,27 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import Header from './components/Header';
+import TransactionForm from './components/TransactionForm';
 import './App.css';
 
 function App() {
+  const [transactions, setTransactions] = useState([]);
+
+  const addTransaction = (newTransaction) => {
+    setTransactions([...transactions, newTransaction]);
+  };
+
+  const deleteTransaction = (id) => {
+    setTransactions(transactions.filter(transaction => transaction.id !== id));
+  };
+
+  // Вычисляем текущий баланс
+  const totalBalance = transactions.reduce((acc, curr) => acc + curr.amount, 0);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <Header />
+      {/* Передаем текущий баланс в компонент TransactionForm */}
+      <TransactionForm addTransaction={addTransaction} transactions={transactions} deleteTransaction={deleteTransaction} totalBalance={totalBalance} />
     </div>
   );
 }
