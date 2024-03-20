@@ -3,6 +3,10 @@ import Header from './components/Header';
 import TransactionForm from './components/TransactionForm';
 import './App.css';
 
+// Добавим импорт для маршрутов
+// import routes from './routes/routes';
+
+
 function App() {
   const [transactions, setTransactions] = useState([]);
 
