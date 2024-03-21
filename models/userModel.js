@@ -1,71 +1,57 @@
-const connection = require('../bd');
+// models/userModel.js
+const db = require('../db');
 
-// Добавление нового пользователя
-const addUser = (userData, callback) => {
-    const { username, email, password } = userData;
-    const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    connection.query(sql, [username, email, password], (err, result) => {
-        if (err) {
-            console.error('Ошибка при добавлении пользователя:', err);
-            callback(err, null);
-            return;
-        }
-        console.log('Пользователь успешно добавлен');
-        callback(null, result.insertId);
-    });
-};
-
-// Получение информации о пользователе по его ID
-const getUserById = (userId, callback) => {
-    const sql = 'SELECT * FROM users WHERE id = ?';
-    connection.query(sql, [userId], (err, result) => {
-        if (err) {
-            console.error('Ошибка при получении пользователя:', err);
-            callback(err, null);
-            return;
-        }
-        if (result.length === 0) {
-            console.log('Пользователь не найден');
-            callback(null, null);
-            return;
-        }
-        console.log('Информация о пользователе получена');
-        callback(null, result[0]);
-    });
-};
-
-// Обновление информации о пользователе
-const updateUser = (userId, userData, callback) => {
-    const { username, email, password } = userData;
-    const sql = 'UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?';
-    connection.query(sql, [username, email, password, userId], (err, result) => {
-        if (err) {
-            console.error('Ошибка при обновлении пользователя:', err);
-            callback(err, null);
-            return;
-        }
-        console.log('Информация о пользователе успешно обновлена');
-        callback(null, result.affectedRows);
-    });
-};
-
-// Удаление пользователя по его ID
-const deleteUser = (userId, callback) => {
-    const sql = 'DELETE FROM users WHERE id = ?';
-    connection.query(sql, [userId], (err, result) => {
-        if (err) {
-            console.error('Ошибка при удалении пользователя:', err);
-            callback(err, null);
-            return;
-        }
-        console.log('Пользователь успешно удален');
-        callback(null, result.affectedRows);
-    });
-};
+// Здесь можно добавить другие функции для работы с данными о пользователях, если необходимо
 
 module.exports = {
-    addUser,
-    getUserById,
-    updateUser,
-    deleteUser
+  // Функция для регистрации нового пользователя
+  registerUser: (username, email, password) => {
+    return new Promise((resolve, reject) => {
+      // Хешируем пароль
+      bcrypt.hash(password, 10, (err, hash) => {
+        if (err) {
+          reject('Ошибка при хешировании пароля');
+        } else {
+          // Сохраняем пользователя в базе данных
+          db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hash], (err, result) => {
+            if (err) {
+              reject('Ошибка при регистрации пользователя');
+            } else {
+              resolve('Пользователь успешно зарегистрирован');
+            }
+          });
+        }
+      });
+    });
+  },
+  // Функция для входа пользователя
+  loginUser: (email, password) => {
+    return new Promise((resolve, reject) => {
+      // Поиск пользователя по email в базе данных
+      db.query('SELECT * FROM users WHERE email = ?', [email], (err, result) => {
+        if (err) {
+          reject('Ошибка при поиске пользователя');
+        } else if (result.length === 0) {
+          reject('Неверный email или пароль');
+        } else {
+          // Сравнение хэшированного пароля
+          bcrypt.compare(password, result[0].password, (err, isEqual) => {
+            if (err) {
+              reject('Ошибка при сравнении паролей');
+            } else if (!isEqual) {
+              reject('Неверный email или пароль');
+            } else {
+              // Генерация JWT токена
+              const token = jwt.sign(
+                { userId: result[0].id, email: result[0].email },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
+              );
+              resolve(token);
+            }
+          });
+        }
+      });
+    });
+  }
 };

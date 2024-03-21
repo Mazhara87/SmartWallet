@@ -17,9 +17,26 @@ function RegistrationForm() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Здесь будет логика для регистрации пользователя
+    try {
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+      if (response.ok) {
+        console.log('User registered successfully');
+        // Редирект на страницу после успешной регистрации
+      } else {
+        console.error('Registration failed');
+        // Обработка ошибки при регистрации
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
   };
 
   return (

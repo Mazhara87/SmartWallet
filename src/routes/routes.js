@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('./controllers/userController');
-const transactionController = require('./controllers/transactionController');
+const userController = require('../controllers/userController');
+const transactionController = require('../controllers/transactionController');
 
 // Маршруты для пользователей
 router.post('/register', userController.register);

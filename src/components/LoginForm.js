@@ -1,31 +1,48 @@
 import React, { useState } from 'react';
 
 function LoginForm() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Здесь будет логика для обработки входа пользователя
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        console.log('User logged in successfully');
+        // Редирект на страницу после успешного входа
+      } else {
+        console.error('Login failed');
+        // Обработка ошибки при входе
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
-          type="text"
-          id="username"
-          value={username}
-          onChange={handleUsernameChange}
+          type="email"
+          id="email"
+          value={email}
+          onChange={handleEmailChange}
           required
         />
       </div>

@@ -1,3 +1,4 @@
+// controllers/transactionController.js
 const db = require('../db');
 
 // Создание новой транзакции
